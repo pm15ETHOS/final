@@ -8,8 +8,8 @@ import webbrowser
 # .env 파일 로드
 load_dotenv()
 
-# 환경변수에서 API 키 가져오기 (Anthropic 또는 OpenAI)
-API_KEY = os.getenv("OPENAI_API_KEY")
+# 환경변수에서 API 키 가져오기 (Anthropic 또는 Gemini)
+API_KEY = os.getenv("GEMINI_API_KEY")
 
 class ProxyHandler(SimpleHTTPRequestHandler):
     def end_headers(self):
@@ -36,9 +36,9 @@ class ProxyHandler(SimpleHTTPRequestHandler):
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length)
             
-            # OpenAI API로 요청 포워딩
+            # Gemini (OpenAI 호환 API)로 요청 포워딩
             req = urllib.request.Request(
-                'https://api.openai.com/v1/chat/completions',
+                'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
                 data=post_data,
                 headers={
                     'Authorization': f'Bearer {API_KEY}',
@@ -71,7 +71,7 @@ class ProxyHandler(SimpleHTTPRequestHandler):
 
 if __name__ == '__main__':
     if not API_KEY:
-        print("❌ 오류: .env 파일에 OPENAI_API_KEY가 설정되어 있지 않습니다.")
+        print("❌ 오류: .env 파일에 GEMINI_API_KEY가 설정되어 있지 않습니다.")
         print("API 키를 설정하고 다시 실행해주세요.")
     else:
         # 고정 포트(예: 8080)로 서버 열기

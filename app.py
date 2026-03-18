@@ -343,7 +343,7 @@ def load_css():
 def init_session_state():
     defaults = {
         "user": None, "is_admin": False, "current_stage": 0,
-        "video_index": 0, "api_key": os.getenv("OPENAI_API_KEY", ""),
+        "video_index": 0, "api_key": os.getenv("GEMINI_API_KEY", ""),
     }
     for k, v in defaults.items():
         if k not in st.session_state:
@@ -358,9 +358,12 @@ def call_openai(scenario_id: str, messages: list) -> dict:
     api_messages = [{"role": "system", "content": system_prompt}]
     for m in messages:
         api_messages.append({"role": m["role"], "content": m["content"]})
-    client = OpenAI(api_key=st.session_state.api_key)
+    client = OpenAI(
+        api_key=st.session_state.api_key,
+        base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
+    )
     response = client.chat.completions.create(
-        model="gpt-4o-mini", messages=api_messages,
+        model="gemini-2.5-flash", messages=api_messages,
         response_format={"type": "json_object"},
     )
     return json.loads(response.choices[0].message.content)
@@ -375,9 +378,12 @@ def call_analysis(scenario_id: str, messages: list, scores: dict) -> dict:
 [만족도] Q1:{scores['Q1']} Q2:{scores['Q2']} Q3:{scores['Q3']} Q4:{scores['Q4']} Q5:{scores['Q5']}"""
     sys_prompt = """AI 윤리 교육 시뮬레이션 결과 분석가입니다. 아래 JSON 형식으로만 응답하세요.
 {"highlight":{"quote":"결정적 한 마디","reason":"이유"},"persuasion_type":{"label":"증거 제시형/공감 유도형/질문 유도형/원칙 강조형/리스크 경고형/관계 기반형 중 1개","emoji":"이모지","description":"설명"},"score_comment":"따뜻한 격려 피드백"}"""
-    client = OpenAI(api_key=st.session_state.api_key)
+    client = OpenAI(
+        api_key=st.session_state.api_key,
+        base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
+    )
     res = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model="gemini-2.5-flash",
         messages=[{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}],
         response_format={"type": "json_object"},
     )
